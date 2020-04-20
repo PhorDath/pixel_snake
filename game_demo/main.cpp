@@ -18,6 +18,7 @@ private:
 	std::chrono::steady_clock::time_point time;
 	bool gameOver = false;
 	int score = 0;
+	int dotSize = 1;
 
 public:
 	Game() {
@@ -26,8 +27,8 @@ public:
 
 	bool OnUserCreate() override {
 		// Called once at the start, so create things here
-		head.first = 10;
-		head.second = 10;
+		head.first = 16;
+		head.second = 16;
 
 		snake.push_back(head);
 
@@ -66,6 +67,9 @@ public:
 				DrawLine(0, i, ScreenWidth(), i, olc::DARK_GREY);
 			}
 			DrawString(5, 5, "GAME OVER\nFINAL SCORE IS\n" + to_string(score), olc::RED, 1);
+			if (GetKey(olc::Key::ESCAPE).bPressed) {
+				exit(1);
+			}
 			return true;
 		}	
 
@@ -84,12 +88,14 @@ public:
 		else if ((GetKey(olc::Key::RIGHT).bPressed || GetKey(olc::Key::RIGHT).bHeld) && dir != 'l') {
 			dir = 'r';
 		}
+		if (GetKey(olc::Key::ESCAPE).bPressed) {
+			exit(1);
+		}
 		if (GetKey(olc::Key::SPACE).bPressed) {
 			if (slp > 0 && score > 0) {
 				slp -= 1;
 				score-=5;
 			}
-			
 		}
 		if (GetKey(olc::Key::X).bPressed) {
 			if (slp >= 15) {
@@ -115,47 +121,48 @@ public:
 			food.second = rand() % ScreenWidth();
 
 			score += 100;
-			slp -= 2;
+			slp -= 1;
 		}
 		
+		// snake movement
 		if (dir == 'u') {
 			head = snake.front();
 			head.second -= 1;
 
 			if (head.second < 0) {
-				head.second = ScreenHeight();
+				head.second = ScreenHeight() - 1;
 			}
 
 			snake.insert(snake.begin() + 0, head);
 			snake.pop_back();
 		}
-		if (dir == 'd') {
+		else if (dir == 'd') {
 			head = snake.front();
 			head.second += 1;
 
-			if (head.second > ScreenHeight()) {
+			if (head.second >= ScreenHeight()) {
 				head.second = 0;
 			}
 
 			snake.insert(snake.begin() + 0, head);
 			snake.pop_back();
 		}
-		if (dir == 'l') {
+		else if (dir == 'l') {
 			head = snake.front();
 			head.first -= 1;
 
 			if (head.first < 0) {
-				head.first = ScreenWidth();
+				head.first = ScreenWidth() - 1;
 			}
 
 			snake.insert(snake.begin() + 0, head);
 			snake.pop_back();
 		}
-		if (dir == 'r') {
+		else if (dir == 'r') {
 			head = snake.front();
 			head.first += 1;
 
-			if (head.first > ScreenWidth()) {
+			if (head.first >= ScreenWidth()) {
 				head.first = 0;
 			}
 
@@ -192,12 +199,10 @@ public:
 	}
 };
 
-using namespace std;
-
 int main()
 {
 	Game demo;
-	if (demo.Construct(100, 100, 8, 8))
+	if (demo.Construct(20, 20, 8, 8))
 		demo.Start();
 
 	return 0;
